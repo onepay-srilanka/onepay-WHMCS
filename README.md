@@ -12,7 +12,7 @@
 
 
 
-## onepay-payment-for-woocommerce
+## onepay-payment-for-WHMCS
 This Payment Gateway For WHMCS extends the functionality of WHMCS to accept payments from Visa, MasterCard, AMEX, & Lanka QR using onepay payment Gateway. onepay Payment Gateway plugin for WHMCS makes your website ready to use inorder to accept Visa, MasterCard, AMEX & Lanka QR on your e-commerce store in a safe way.   onepay is most widely used payment gateway to process payments online and accepts Visa, MasterCard, Discover and other variants of cards.
 
 ### Contribute
