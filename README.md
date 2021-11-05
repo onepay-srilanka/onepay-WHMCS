@@ -25,7 +25,7 @@ This Payment Gateway For WHMCS extends the functionality of WHMCS to accept paym
 7. 	copy "onepay.php file" inside callback folder in the downloaded file and paste it in your server navigated in step 6.
 8.  Now you are ready for payments 
 
-
+[Video demonstration for installation is available here](https://drive.google.com/file/d/1gRB_NC0cEOgnmecE2bwVwjVVmqNgh19r/view?usp=sharing)
 
 ## Frequently Asked Questions
 
