@@ -343,25 +343,27 @@ function onepay_link($params)
         // The 'One-time' Form
         if ($subscriptionsProcessedAs == 'option3' ||
             $defaultedToBothOptions){
+                $backupfields['amount'] =  sprintf("%.2f",$amount);
+                $backupfields['type'] = "ONETIME";
 
 
-                $requestData = array(
-                    "transaction_redirect_url" => $systemUrl. 'viewinvoice.php?id=' . $invoiceId,
-                    "customer_email" => $email,
-                    "customer_phone_number" => $phone,
-                    "reference" => (string)$invoiceId,
-                    "amount" => number_format(floatval($amount),2,'.',''),
-                    "app_id" =>  $appId,            
-                    'is_sdk' => "1",
-                    'sdk_type' => "WHMCS",
-                    'authorization' => $authKey,
-                );
+                // $requestData = array(
+                //     "transaction_redirect_url" => $systemUrl. 'viewinvoice.php?id=' . $invoiceId,
+                //     "customer_email" => $email,
+                //     "customer_phone_number" => $phone,
+                //     "reference" => (string)$invoiceId,
+                //     "amount" => number_format(floatval($amount),2,'.',''),
+                //     "app_id" =>  $appId,            
+                //     'is_sdk' => "1",
+                //     'sdk_type' => "WHMCS",
+                //     'authorization' => $authKey,
+                // );
 
-                $result_body = json_encode($requestData,JSON_UNESCAPED_SLASHES);
-                $result_body .= $secretKey;
-                $hash_result = hash('sha256',$result_body);
+                // $result_body = json_encode($requestData,JSON_UNESCAPED_SLASHES);
+                // $result_body .= $secretKey;
+                // $hash_result = hash('sha256',$result_body);
     
-                $url .= "?hash=$hash_result";
+                // $url .= "?hash=$hash_result";
 
 
             $htmlOutput .= '<form method="post" action="' . $url . '">';
