@@ -247,10 +247,10 @@ function onepay_link($params)
         // Change the existing postfields array to
         // allow to call the recurring API
         $postfields['type'] = "RECURRING";
-        $postfields['recurring_amount'] = $result->recurringTotal;
+        $postfields['recurring_amount'] =  number_format(floatval($result->recurringTotal),2,'.','');
         $postfields['amount'] = number_format(floatval($result->startupTotal + $result->recurringTotal),2,'.','');
         $postfields['rec_type'] = $firstRecurringProduct->recurringPeriod;
-        // $postfields['duration'] = $firstRecurringProduct->recurringDuration;
+        $postfields['duration'] = $firstRecurringProduct->recurringDuration;
 
         if($firstRecurringProduct->cycle>0)
         {
@@ -266,13 +266,20 @@ function onepay_link($params)
         // $postfields['item_number_1'] = $description;
     }
     else{
-        do_log_onepay('PH: Not using recurring payments');
+
+        $postfields['amount'] =  sprintf("%.2f",$amount);
+        $postfields['type'] = "ONETIME";
+        $postfields['duration'] = true;
+
+
+        do_log_onepay('OP: Not using recurring payments');
         // $postfields['item_name_1'] = $description;
         // $postfields['amount_1'] = $amount;
         // $postfields['quantity_1'] = "1"; 
         // $postfields['item_number_1'] = $invoiceId;
-        $postfields['amount'] =  sprintf("%.2f",$amount);
-        $postfields['type'] = "ONETIME";
+
+
+
     }
     
     // Add tax 
@@ -280,14 +287,14 @@ function onepay_link($params)
     
     if ($invoiceContainsRecurringItems && $canCallRecurringApiIfNeeded){
         // DEBUG tax amount
-        do_log_onepay('PH: Adding a tax of ' . $taxAmount);
+        do_log_onepay('OP: Adding a tax of ' . $taxAmount);
         // $postfields['amount_1'] = $postfields['amount_1'] + $taxAmount;number_format(floatval($taxAmount),2,'.','');
-        // $postfields['amount'] = $postfields['amount'] +  number_format(floatval($taxAmount),2,'.','');
-        do_log_onepay('PH: Final ST = ' . $postfields['startup_fee'] . ' REC = ' . $postfields['amount'] . ' Recurs every ' . $postfields['recurrence'] . ' for ' . $postfields['duration']);
+        $postfields['amount'] = number_format(floatval($taxAmount + $postfields['amount']),2,'.','');
+        do_log_onepay('OP: Final ST = ' . $postfields['startup_fee'] . ' REC = ' . $postfields['amount'] . ' Recurs every ' . $postfields['recurrence'] . ' for ' . $postfields['duration']);
     }
     else{
-        do_log_onepay('PH: Tax is included in the invoice. Tax = ' . $taxAmount);
-        do_log_onepay('PH: Final AMT = ' . $postfields['amount']);
+        do_log_onepay('OP: Tax is included in the invoice. Tax = ' . $taxAmount);
+        do_log_onepay('OP: Final AMT = ' . $postfields['amount']);
     }
 
     // Create the Forms
@@ -345,8 +352,7 @@ function onepay_link($params)
             $defaultedToBothOptions){
                 $backupfields['amount'] =  sprintf("%.2f",$amount);
                 $backupfields['type'] = "ONETIME";
-
-
+                $backupfields['duration'] = "1";
                 // $requestData = array(
                 //     "transaction_redirect_url" => $systemUrl. 'viewinvoice.php?id=' . $invoiceId,
                 //     "customer_email" => $email,
@@ -358,9 +364,10 @@ function onepay_link($params)
                 //     'sdk_type' => "WHMCS",
                 //     'authorization' => $authKey,
                 // );
-
+                
                 // $result_body = json_encode($requestData,JSON_UNESCAPED_SLASHES);
                 // $result_body .= $secretKey;
+                // echo ($result_body);
                 // $hash_result = hash('sha256',$result_body);
     
                 // $url .= "?hash=$hash_result";

@@ -52,7 +52,7 @@ function getFirstRecurringProductOnepay($invoiceId){
  */
 function getStartupAndRecurrenceTotalForInvoiceWithFirstProductOnepay($invoiceId, $firstProduct){
 
-	do_log_onepay('PH: getStartupAndRecurrenceTotalForInvoiceWithFirstProductOnepay invoked ');
+	do_log_onepay('OP: getStartupAndRecurrenceTotalForInvoiceWithFirstProductOnepay invoked ');
 
 	$startupFeeTotal = 0.0;
 	$recurringTotal = 0.0;
@@ -75,21 +75,21 @@ function getStartupAndRecurrenceTotalForInvoiceWithFirstProductOnepay($invoiceId
 			if ($periodsMatch && $durationsMatch){
 				$startupFeeTotal += $phProduct->recurringStartupFee;
 				$recurringTotal += $phProduct->unitPrice;
-				do_log_onepay('PH: Adding invoice item ' . $id . ' to cart as a recurring product ST = ' . $phProduct->recurringStartupFee . ' REC = '. $phProduct->unitPrice);
+				do_log_onepay('OP: Adding invoice item ' . $id . ' to cart as a recurring product ST = ' . $phProduct->recurringStartupFee . ' REC = '. $phProduct->unitPrice);
 			}
 			else{
-				do_log_onepay('PH: Skipping invoice item ' . $id);
+				do_log_onepay('OP: Skipping invoice item ' . $id);
 			}
 		}
 		else if(!$phProduct->isUnknownProductType && !$phProduct->isRecurring){
 			// Is genuinely non-recurring (consder as a startup product)
 			$startupFeeTotal += $phProduct->unitPrice;
-			do_log_onepay('PH: Adding invoice item ' . $id . ' to cart as a normal product AMT = ' . $phProduct->unitPrice);
+			do_log_onepay('OP: Adding invoice item ' . $id . ' to cart as a normal product AMT = ' . $phProduct->unitPrice);
 		}
 		else{
-			do_log_onepay('PH: Unknown error with invoice item ' . $id . '');
+			do_log_onepay('OP: Unknown error with invoice item ' . $id . '');
 		}
-		do_log_onepay('PH: loop status ST = ' . $startupFeeTotal . ' REC = ' . $recurringTotal . ' ');
+		do_log_onepay('OP: loop status ST = ' . $startupFeeTotal . ' REC = ' . $recurringTotal . ' ');
 	}
 
 	return new onepayPriceData($startupFeeTotal, $recurringTotal);
