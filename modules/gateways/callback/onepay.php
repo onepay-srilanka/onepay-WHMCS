@@ -15,19 +15,7 @@ require_once __DIR__ . '/../../../includes/gatewayfunctions.php';
 require_once __DIR__ . '/../../../includes/invoicefunctions.php';
 
 
-define('PH_PAYMENT_STATUS_SUCCESS', "2", true);
-define('PH_PAYMENT_STATUS_PENDING', "0", true);
-define('PH_PAYMENT_STATUS_CANCELED', "-1", true);
-define('PH_PAYMENT_STATUS_FAILED', "-2", true);
-define('PH_PAYMENT_STATUS_CHARGED_BACK', "-3", true);
 
-
-define("PH_REC_MSG_AUTH_SUCCESS", "AUTHORIZATION_SUCCESS", true);
-define("PH_REC_MSG_AUTH_FAILED", "AUTHORIZATION_FAILED", true);
-define("PH_REC_MSG_INSTALLMENT_SUCCESS", "RECURRING_INSTALLMENT_SUCCESS", true);
-define("PH_REC_MSG_INSTALLMENT_FAILED", "RECURRING_INSTALLMENT_FAILED", true);
-define("PH_REC_MSG_COMPLETE", "RECURRING_COMPLETE", true);
-define("PH_REC_MSG_STOPPED", "RECURRING_STOPPED", true);
 
 use WHMCS\Database\Capsule;
 

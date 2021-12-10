@@ -34,50 +34,50 @@ function getRecurringInfoForBillingCycle_onepay($billingcycle, $recurringcycle){
     else if($billingcycle == "monthly"){
         $recurring_info['period'] = 'MONTHLY';
         $recurring_info['cycle'] = $recurringcycle;
-        $recurring_info['duration'] = $recurringcycle . ' Month';
+        $recurring_info['duration'] = "1";
         $recurring_info['recurring_word'] = 'Month';
     }
     else if($billingcycle == "quarterly"){
         $recurring_info['period'] = 'QUARTERLY';
         $recurring_info['cycle'] = $recurringcycle;
-        $recurring_info['duration'] = (3 * $recurringcycle) . ' Month';
+        $recurring_info['duration'] = "1";
         $recurring_info['recurring_word'] = 'Month';
         $recurring_info['recurring_modifier'] = 3;
     }
     else if($billingcycle == "semi-annually"){
         $recurring_info['period'] = 'SEMI-ANNUALLY';
         $recurring_info['cycle'] = $recurringcycle;
-        $recurring_info['duration'] = (6 * $recurringcycle) . ' Month';
+        $recurring_info['duration'] = "1";
         $recurring_info['recurring_word'] = 'Month';
         $recurring_info['recurring_modifier'] = 6;
     }
     else if($billingcycle == "annually"){
         $recurring_info['period'] = 'ANNUALLY';
         $recurring_info['cycle'] = $recurringcycle;
-        $recurring_info['duration'] = $recurringcycle . ' Year';
+        $recurring_info['duration'] = "1";
         $recurring_info['recurring_word'] = 'Year';
     }
     else if($billingcycle == "biennially"){
         $recurring_info['period'] = 'BI-ANNUALLY';
         $recurring_info['cycle'] = $recurringcycle;
-        $recurring_info['duration'] = (2 * $recurringcycle) . ' Year';
+        $recurring_info['duration'] = "1";
         $recurring_info['recurring_word'] = 'Year';
         $recurring_info['recurring_modifier'] = 2;
     }
     else if($billingcycle == "triennially"){
         $recurring_info['period'] = 'TRI-ANNUALLY';
         $recurring_info['cycle'] = $recurringcycle;
-        $recurring_info['duration'] = (3 * $recurringcycle) . ' Year';
+        $recurring_info['duration'] = "1";
         $recurring_info['recurring_word'] = 'Year';
         $recurring_info['recurring_modifier'] = 3;
     }
     else{
-        do_log_onepay('PH: Unknown billing cycle passed found: "' . $billingcycle . "\"");
+        do_log_onepay('OP: Unknown billing cycle passed found: "' . $billingcycle . "\"");
     }
 
     if ($recurringcycle == 0){
         $recurring_info['cycle'] = 0;
-        $recurring_info['duration'] = 'Forever';
+        $recurring_info['duration'] = "0";
         $recurring_info['recurring_forever'] = true;
     }
 
@@ -118,7 +118,7 @@ function getConsumableProductsForTblInvoiceItemIdOnepay($invoiceItemId){
     else if ($product_type == "hosting"){
 
         $hosting_details = Capsule::table('tblhosting')->where('id', '=', $relative_table_id_column_value)->first();
-        do_log_onepay_or_exception_if_null_onepay($hosting_details, "PH: Hosting details could not be found");
+        do_log_onepay_or_exception_if_null_onepay($hosting_details, "OP: Hosting details could not be found");
         $billing_cycle = strtolower($hosting_details->billingcycle);
 
         if($billing_cycle != "one time"){
@@ -138,7 +138,7 @@ function getConsumableProductsForTblInvoiceItemIdOnepay($invoiceItemId){
     }
     else if ($product_type == "domainregister" || $product_type == "domaintransfer" || $product_type == "domainrenew"){
         $domain_details = Capsule::table('tbldomains')->where('id', '=', $relative_table_id_column_value)->first();
-        do_log_onepay_or_exception_if_null_onepay($domain_details, "PH: Domain details could not be found");
+        do_log_onepay_or_exception_if_null_onepay($domain_details, "OP: Domain details could not be found");
         $registration_period = (int) $domain_details->registrationperiod;
 
         $existing_unit_price = $consumable_product->unitPrice;
@@ -189,7 +189,7 @@ function getConsumableProductsForTblInvoiceItemIdOnepay($invoiceItemId){
     }
     else if ($product_type == "addon"){
         $addon_details = Capsule::table('tblhostingaddons')->where('id', '=', $relative_table_id_column_value)->first();
-        do_log_onepay_or_exception_if_null_onepay($addon_details, "PH: Addon details could not be found");
+        do_log_onepay_or_exception_if_null_onepay($addon_details, "OP: Addon details could not be found");
         $addon_billing_cycle = strtolower($addon_details->billingcycle);
 
         if ($addon_billing_cycle != "one time"){
@@ -212,7 +212,7 @@ function getConsumableProductsForTblInvoiceItemIdOnepay($invoiceItemId){
     else if ($product_type == "item"){ // Billable items
         
         $billable_item_details = Capsule::table('tblbillableitems')->where('id', '=', $relative_table_id_column_value)->first();
-        do_log_onepay_or_exception_if_null_onepay($billable_item_details, "PH: Billable item details could not be found");
+        do_log_onepay_or_exception_if_null_onepay($billable_item_details, "OP: Billable item details could not be found");
         $item_is_recurring = $billable_item_details->invoiceaction == 4;
 
         if ($item_is_recurring){
@@ -296,7 +296,7 @@ function getConsumableProductsForTblInvoiceItemIdOnepay($invoiceItemId){
                 $firstRecProduct
             );
             
-            do_log_onepay_or_exception_if_null_onepay($invRes, "PH: Invoice result was null");
+            do_log_onepay_or_exception_if_null_onepay($invRes, "OP: Invoice result was null");
 
             $consumable_product->isRecurring = true;
             $consumable_product->isRecurringForever = $firstRecProduct->isRecurringForever;
@@ -315,7 +315,7 @@ function getConsumableProductsForTblInvoiceItemIdOnepay($invoiceItemId){
     else if ($product_type == "promohosting"){
         // The Product the promotion is associated with
         $hosting_details = Capsule::table('tblhosting')->where('id', '=', $relative_table_id_column_value)->first();
-        do_log_onepay_or_exception_if_null_onepay($hosting_details, "PH: Hosting details could not be found while looking up Promotion");
+        do_log_onepay_or_exception_if_null_onepay($hosting_details, "OP: Hosting details could not be found while looking up Promotion");
 
         // The actual promotion id
         $promo_id = $hosting_details->promoid;
@@ -357,7 +357,7 @@ function getConsumableProductsForTblInvoiceItemIdOnepay($invoiceItemId){
     }
     else if ($product_type == "promodomain"){
         $domain_details = Capsule::table('tbldomains')->where('id', '=', $relative_table_id_column_value)->first();
-        do_log_onepay_or_exception_if_null_onepay($domain_details, "PH: Domain details could not be found whiling looking up Promotion");
+        do_log_onepay_or_exception_if_null_onepay($domain_details, "OP: Domain details could not be found whiling looking up Promotion");
         $promo_id = $domain_details->promoid;
         
         $promotion_detail = Capsule::table('tblpromotions')->where('id', '=', $promo_id)->first();
