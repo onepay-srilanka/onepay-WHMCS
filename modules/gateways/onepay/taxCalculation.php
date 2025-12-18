@@ -4,9 +4,9 @@
  * Tax Retriever Helpers
  *
  * @see https://developer.onepay.lk
- * @copyright Copyright (c) 2021 onepay (Private) Limited
+ * @copyright Copyright (c) 2021-2024 onepay (Private) Limited
  * @license https://www.onepay.lk/legal
- * @version 1.0 RELEASE COPY
+ * @version 1.1
  */
 
 use WHMCS\Database\Capsule;

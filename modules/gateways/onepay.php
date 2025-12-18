@@ -3,9 +3,9 @@
  * WHMCS onepay Payment Gateway Module
  *
  * @see https://onepay.lk
- * @copyright Copyright (c) 2021 onepay (Private) Limited
+ * @copyright Copyright (c) 2021-2024 onepay (Private) Limited
  * @license https://privacy-onepay.spemai.com/
- * @version 1.0 RELEASE COPY
+ * @version 1.1
  */
 
 if (!defined("WHMCS")) {
@@ -26,9 +26,10 @@ function onepay_MetaData()
 {
     return array(
         'DisplayName' => 'onepay Payment Gateway Module',
-        'APIVersion' => '1.1', // Use API Version 1.1
+        'APIVersion' => '1.1',
         'DisableLocalCredtCardInput' => true,
         'TokenisedStorage' => false,
+        'Description' => 'Accept payments via Visa, MasterCard, AMEX, and Lanka QR. Supports both one-time and recurring subscription payments. Secure payment processing powered by onepay.',
     );
 }
 
@@ -91,7 +92,7 @@ function onepay_config()
             'Type' => 'text',
             'Size' => '100',
             'Default' => '',
-            'Description' => 'App token you set in your oenpay Account',
+            'Description' => 'App token you set in your onepay Account',
         ),
 
         // how to handle subscriptions
@@ -126,70 +127,67 @@ function onepay_config()
 function onepay_link($params)
 {
     // Gateway Configuration Parameters
-    $appId = $params['appID'];
-    $secretKey = $params['secretKey'];
-    $authKey= $params['authKey'];
-    $subscriptionsProcessedAs = $params['subscriptionsProcessedAs'];
+    $appId = isset($params['appID']) ? trim($params['appID']) : '';
+    $secretKey = isset($params['secretKey']) ? trim($params['secretKey']) : '';
+    $authKey = isset($params['authKey']) ? trim($params['authKey']) : '';
+    $subscriptionsProcessedAs = isset($params['subscriptionsProcessedAs']) ? $params['subscriptionsProcessedAs'] : 'option3';
+
+    // Validate required configuration
+    if (empty($appId) || empty($secretKey) || empty($authKey)) {
+        return '<div class="alert alert-danger">Payment gateway configuration error. Please contact support.</div>';
+    }
 
     // Invoice Parameters
-    $invoiceId = $params['invoiceid'];
-    $description = $params['description'];
-    //$amount = $params['amount']? number_format($params['amount'], 2, '.', '') : "0.00";
-    $amount=sprintf("%.2f",floatval($params['amount']));
-    $currencyCode = $params['currency'];
+    $invoiceId = isset($params['invoiceid']) ? (int)$params['invoiceid'] : 0;
+    $description = isset($params['description']) ? $params['description'] : '';
+    $amount = isset($params['amount']) ? sprintf("%.2f", floatval($params['amount'])) : "0.00";
+    $currencyCode = isset($params['currency']) ? $params['currency'] : '';
 
     // Client Parameters
-    $firstname = $params['clientdetails']['firstname'];
-    $lastname = $params['clientdetails']['lastname'];
-    $email = $params['clientdetails']['email'];
-    $address1 = $params['clientdetails']['address1'];
-    $address2 = $params['clientdetails']['address2'];
-    $city = $params['clientdetails']['city'];
-    $state = $params['clientdetails']['state'];
-    $postcode = $params['clientdetails']['postcode'];
-    $country = $params['clientdetails']['country'];
-    $phone = $params['clientdetails']['phonenumber'];
+    $firstname = isset($params['clientdetails']['firstname']) ? trim($params['clientdetails']['firstname']) : '';
+    $lastname = isset($params['clientdetails']['lastname']) ? trim($params['clientdetails']['lastname']) : '';
+    $email = isset($params['clientdetails']['email']) ? trim($params['clientdetails']['email']) : '';
+    $address1 = isset($params['clientdetails']['address1']) ? trim($params['clientdetails']['address1']) : '';
+    $address2 = isset($params['clientdetails']['address2']) ? trim($params['clientdetails']['address2']) : '';
+    $city = isset($params['clientdetails']['city']) ? trim($params['clientdetails']['city']) : '';
+    $state = isset($params['clientdetails']['state']) ? trim($params['clientdetails']['state']) : '';
+    $postcode = isset($params['clientdetails']['postcode']) ? trim($params['clientdetails']['postcode']) : '';
+    $country = isset($params['clientdetails']['country']) ? trim($params['clientdetails']['country']) : '';
+    $phone = isset($params['clientdetails']['phonenumber']) ? trim($params['clientdetails']['phonenumber']) : '';
 
     // System Parameters
-    $companyName = $params['companyname'];
-    $systemUrl = $params['systemurl'];
-    $returnUrl = $params['returnurl'];
-    $langPayNow = $params['langpaynow'];
-    $moduleDisplayName = $params['name'];
-    $moduleName = $params['paymentmethod'];
-    $whmcsVersion = $params['whmcsVersion'];
+    $companyName = isset($params['companyname']) ? $params['companyname'] : '';
+    $systemUrl = isset($params['systemurl']) ? rtrim($params['systemurl'], '/') : '';
+    $returnUrl = isset($params['returnurl']) ? $params['returnurl'] : '';
+    $langPayNow = isset($params['langpaynow']) ? $params['langpaynow'] : 'Pay Now';
+    $moduleDisplayName = isset($params['name']) ? $params['name'] : 'onepay';
+    $moduleName = isset($params['paymentmethod']) ? $params['paymentmethod'] : 'onepay';
+    $whmcsVersion = isset($params['whmcsVersion']) ? $params['whmcsVersion'] : '';
 
-    //$url = 'https://merchant-api-development.onepay.lk/api/ipg/gateway/whmc/';
-    //$url = 'http://localhost:8001/api/ipg/gateway/whmc/';
+    // API Endpoint
     $url = 'https://merchant-api-live-v2.onepay.lk/api/ipg/gateway/whmc/';
 
-
-    // Fields for the form
-    $postfields = array();
-    
     // Backup of the original form
     // since we need one for the "Pay Now"
     // button when Recurring payments
     // are available
     $backupfields = array();
 
-    // DB Access Helpers
-    if (file_exists('../../dbconnect.php')) {
-		include '../../dbconnect.php';
-	} else if (file_exists('../../init.php')) {
-		include '../../init.php';
-    } else{ 
-        //logToTable('Its an error!');
+    // Ensure WHMCS database connection is available
+    if (!class_exists('WHMCS\Database\Capsule')) {
+        require_once __DIR__ . '/../../../init.php';
     }
 
+    // Prepare base post fields
+    $postfields = array();
     $postfields['app_id'] = $appId;
-    $postfields['transaction_callback_url'] = $systemUrl . 'modules/gateways/callback/' . $moduleName . '.php';
-    $postfields['transaction_redirect_url'] =  $systemUrl. 'viewinvoice.php?id=' . $invoiceId;
+    $postfields['transaction_callback_url'] = $systemUrl . '/modules/gateways/callback/' . $moduleName . '.php';
+    $postfields['transaction_redirect_url'] = $systemUrl . '/viewinvoice.php?id=' . $invoiceId;
     $postfields['customer_first_name'] = $firstname;
     $postfields['customer_last_name'] = $lastname;
     $postfields['customer_email'] = $email;
     $postfields['customer_phone_number'] = $phone;
-    $postfields['reference'] = $invoiceId;
+    $postfields['reference'] = (string)$invoiceId;
     $postfields['currency'] = $currencyCode;
     $postfields['callback_authorization'] = "not";
     $postfields['authorization'] = $authKey;
@@ -339,11 +337,11 @@ function onepay_link($params)
 
                 $url .= "?hash=$hash_result";
                 
-            $htmlOutput .= '<form method="post" action="' . $url . '" style="margin-bottom: 0;">';
+            $htmlOutput .= '<form method="post" action="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '" style="margin-bottom: 0;">';
             foreach ($postfields as $k => $v) {
-                $htmlOutput .= '<input type="hidden" name="' . $k . '" value="' . $v . '" />';
+                $htmlOutput .= '<input type="hidden" name="' . htmlspecialchars($k, ENT_QUOTES, 'UTF-8') . '" value="' . htmlspecialchars($v, ENT_QUOTES, 'UTF-8') . '" />';
             }
-            $htmlOutput .= '<input type="image" alt="' . 'Subscribe with onepay' . '" src="https://onepayserviceimages.s3.ap-southeast-1.amazonaws.com/subscribebtn.png" title="Subscribe with onepay" width="154"/>';
+            $htmlOutput .= '<input type="image" alt="Subscribe with onepay" src="https://storage.googleapis.com/onepayjs/subscribe-btn.png" title="Subscribe with onepay" width="154"/>';
             $htmlOutput .= '</form>';
         }
         
@@ -373,11 +371,11 @@ function onepay_link($params)
                 // $url .= "?hash=$hash_result";
 
 
-            $htmlOutput .= '<form method="post" action="' . $url . '">';
+            $htmlOutput .= '<form method="post" action="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">';
             foreach ($backupfields as $k => $v) {
-                $htmlOutput .= '<input type="hidden" name="' . $k . '" value="' . $v . '" />';
+                $htmlOutput .= '<input type="hidden" name="' . htmlspecialchars($k, ENT_QUOTES, 'UTF-8') . '" value="' . htmlspecialchars($v, ENT_QUOTES, 'UTF-8') . '" />';
             }
-            $htmlOutput .= '<input type="image" alt="' . $langPayNow . '" src="https://onepayserviceimages.s3.ap-southeast-1.amazonaws.com/paybtn.png" title="Pay with onepay" width="132"/>';
+            $htmlOutput .= '<input type="image" alt="' . htmlspecialchars($langPayNow, ENT_QUOTES, 'UTF-8') . '" src="https://storage.googleapis.com/onepayjs/pay-btn.png" title="Pay with onepay" width="132"/>';
             $htmlOutput .= '</form>';
         }
 
@@ -407,11 +405,11 @@ function onepay_link($params)
 
         
         $htmlOutput .= '<table style="border-collapse: separate; border-spacing: 15px 0;"><tbody><tr><td>';
-        $htmlOutput .= '<form method="post" action="' . $url . '">';
+        $htmlOutput .= '<form method="post" action="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">';
         foreach ($postfields as $k => $v) {
-            $htmlOutput .= '<input type="hidden" name="' . $k . '" value="' . $v . '" />';
+            $htmlOutput .= '<input type="hidden" name="' . htmlspecialchars($k, ENT_QUOTES, 'UTF-8') . '" value="' . htmlspecialchars($v, ENT_QUOTES, 'UTF-8') . '" />';
         }
-        $htmlOutput .= '<input type="image" alt="' . $langPayNow . '" src="https://onepayserviceimages.s3.ap-southeast-1.amazonaws.com/paybtn.png" title="Pay with onepay" width="132"/>';
+        $htmlOutput .= '<input type="image" alt="' . htmlspecialchars($langPayNow, ENT_QUOTES, 'UTF-8') . '" src="https://storage.googleapis.com/onepayjs/pay-btn.png" title="Pay with onepay" width="132"/>';
         $htmlOutput .= '</form>';
         $htmlOutput .= '</td></tr></tbody></table>';
     }

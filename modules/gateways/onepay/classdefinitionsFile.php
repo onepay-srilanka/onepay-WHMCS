@@ -4,9 +4,9 @@
  * Plugin Class Definitions
  *
  * @see https://developer.onepay.lk
- * @copyright Copyright (c) 2021 onepay (Private) Limited
+ * @copyright Copyright (c) 2021-2024 onepay (Private) Limited
  * @license https://www.onepay.lk/legal
- * @version 1.0 RELEASE COPY
+ * @version 1.1
  */
 
 define('DO_DEBUG', '');
@@ -88,12 +88,12 @@ class onepaySplitWordResponse{
                 $this->word = "Year";
             }
             else{
-                throw new Exception("onepaySplitWordResponse.initFromMethods() - Unknown state");
+                throw new Exception("onepaySplitWordResponse.initFromMonths() - Unknown state");
             }
         }
         else{
             $this->number = $months;
-            $this->word = "Year";
+            $this->word = "Month";
         }
     }
 
@@ -211,11 +211,11 @@ class onepayConsumableProduct{
      * @return double
      */
     function getPrice(){
-        if($isRecurring){
-            return $unitPrice + $recurringStartupFee;
+        if($this->isRecurring){
+            return $this->unitPrice + $this->recurringStartupFee;
         }
         else{
-            return $unitPrice;
+            return $this->unitPrice;
         }
     }
 }

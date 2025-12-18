@@ -4,9 +4,9 @@
  * onepay Consumable Product Helpers
  *
  * @see https://developer.onepay.lk
- * @copyright Copyright (c) 2021 onepay (Private) Limited
+ * @copyright Copyright (c) 2021-2024 onepay (Private) Limited
  * @license https://www.onepay.lk/legal
- * @version 1.0 RELEASE COPY
+ * @version 1.1
  */
 
 use WHMCS\Database\Capsule;
@@ -292,7 +292,7 @@ function getConsumableProductsForTblInvoiceItemIdOnepay($invoiceItemId){
              * @var onepayPriceData
              */
             $invRes = getStartupAndRecurrenceTotalForInvoiceWithFirstProductOnepay(
-                $$inner_invoice_id, 
+                $inner_invoice_id, 
                 $firstRecProduct
             );
             
@@ -306,7 +306,7 @@ function getConsumableProductsForTblInvoiceItemIdOnepay($invoiceItemId){
             $consumable_product->unitPrice = $invRes->recurringTotal;
         }
         
-        $taxAmt = getTaxForInvoice($inner_invoice_id);
+        $taxAmt = getTaxForInvoiceOnepay($inner_invoice_id);
         $consumable_product->unitPrice = $consumable_product->unitPrice + $taxAmt;
         if ($invoiceHasRecProducts){
             $consumable_product->recurringStartupFee = $consumable_product->recurringStartupFee + $taxAmt;
