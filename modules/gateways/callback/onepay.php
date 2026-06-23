@@ -1,6 +1,12 @@
 <?php
 /**
- * Patched by HostGrap Technologies - Vidurath Jayaweera
+ * WHMCS onepay Payment Gateway Module
+ * Callback File
+ *
+ * @see https://developer.onepay.lk
+ * @copyright Copyright (c) 2021-2026 onepay (Private) Limited
+ * @license https://www.onepay.lk/legal
+ * @version 1.2
  */
 
 require_once __DIR__ . '/../../../init.php';
